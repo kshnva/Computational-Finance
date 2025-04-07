@@ -38,7 +38,7 @@ def calculate_garman_klass_estimator(data):
     return garman_klass_estimator
 
 
-def plot_rolling_window_estimate(data, T):
+def get_rolling_window_estimates(data, T):
     classic_measures = []
     park_estimates = []
     garman_estimates = []
@@ -50,6 +50,9 @@ def plot_rolling_window_estimate(data, T):
         park_estimates.append(calculate_parkinsons_estimator(current_window))
         garman_estimates.append(calculate_garman_klass_estimator(current_window))
 
+    return classic_measures, park_estimates, garman_estimates
+
+def plot_rolling_window_estimate(classic_measures, park_estimates, garman_estimates, T): 
     # plot volatility estimates
     plt.plot(classic_measures, label='Classic')
     plt.plot(park_estimates, label='Parkinson')
@@ -59,6 +62,31 @@ def plot_rolling_window_estimate(data, T):
     plt.xlabel("Days")
     plt.ylabel("Volatility")
     plt.legend()
+    plt.show()
+
+def get_volatility_signature(data, windows):
+    classic_measures = []
+    park_estimates = []
+    garman_estimates = []
+
+    for window in windows:
+        classic, park, garman = get_rolling_window_estimates(data, window)
+        classic_measures.append(np.mean(classic))
+        park_estimates.append(np.mean(park))
+        garman_estimates.append(np.mean(garman))
+
+    return classic_measures, park_estimates, garman_estimates
+
+def plot_volatility_signature(windows, avg_classic_list, avg_park_list, avg_garman_list):
+    plt.figure(figsize=(10, 6))
+    plt.plot(windows, avg_classic_list, marker='o', label='Classic')
+    plt.plot(windows, avg_park_list, marker='o', label='Parkinson')
+    plt.plot(windows, avg_garman_list, marker='o', label='Garman-Klass')
+    plt.xlabel('Window Size (m)')
+    plt.ylabel('Average Realized Volatility')
+    plt.title('Volatility Signature Plot')
+    plt.legend()
+    plt.grid(True)
     plt.show()
 
 
@@ -74,7 +102,18 @@ parkinsons_volatility = calculate_parkinsons_estimator(df)
 print(f"Parkinson's Volatility Estimate: {parkinsons_volatility}")
 
 window_size = 30
-plot_rolling_window_estimate(df, window_size) # takes a bit to run
+classic_measures, park_estimates, garman_estimates = get_rolling_window_estimates(df, window_size) 
+#plot_rolling_window_estimate(classic_measures, park_estimates, garman_estimates, window_size)
+
+windows = [5, 10, 20, 30, 60, 90]
+c_vol_means, p_vol_means, g_vol_means = get_volatility_signature(df, windows)
+plot_volatility_signature(windows, c_vol_means, p_vol_means, g_vol_means)
+
+
+
+    
+
+
 
 
 
