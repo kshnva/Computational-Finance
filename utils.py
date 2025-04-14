@@ -37,7 +37,6 @@ def calculate_garman_klass_estimator(data):
     garman_klass_estimator = np.sqrt(first_term - second_term)
     return garman_klass_estimator
 
-
 def get_rolling_window_estimates(data, T):
     classic_measures = []
     park_estimates = []
@@ -89,27 +88,22 @@ def plot_volatility_signature(windows, avg_classic_list, avg_park_list, avg_garm
     plt.grid(True)
     plt.show()
 
-
-ticker = "AAPL"
-start_date = "2010-01-01"
-end_date = datetime.datetime.now().strftime("%Y-%m-%d")
-df = yf.download(ticker, start=start_date, end=end_date)
-
-garman_klass_volatility = calculate_garman_klass_estimator(df)
-print(f"Garman-Klass Volatility Estimate: {garman_klass_volatility}")
-
-parkinsons_volatility = calculate_parkinsons_estimator(df)
-print(f"Parkinson's Volatility Estimate: {parkinsons_volatility}")
-
-window_size = 30
-classic_measures, park_estimates, garman_estimates = get_rolling_window_estimates(df, window_size) 
-#plot_rolling_window_estimate(classic_measures, park_estimates, garman_estimates, window_size)
-
-windows = [5, 10, 20, 30, 60, 90]
-c_vol_means, p_vol_means, g_vol_means = get_volatility_signature(df, windows)
-plot_volatility_signature(windows, c_vol_means, p_vol_means, g_vol_means)
-
-
+def find_closest_expiry(spx_symbol, today, days_from_today=30):
+    spx_ticker = yf.Ticker(spx_symbol)
+    expiry_dates = spx_ticker.options
+    if today is None:
+        today = datetime.datetime.today()
+    expiry_dates_sorted = sorted([datetime.datetime.strptime(expiry, "%Y-%m-%d") for expiry in expiry_dates])
+    closest_expiry = None
+    min_diff = float('inf')
+    for expiry_date in expiry_dates_sorted:
+        days_to_expiry = (expiry_date - today).days
+        if days_to_expiry >= 0:
+            diff = abs(days_to_expiry - days_from_today)
+            if diff < min_diff:
+                min_diff = diff
+                closest_expiry = expiry_date
+    return closest_expiry
 
     
 
