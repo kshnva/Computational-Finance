@@ -105,7 +105,28 @@ def find_closest_expiry(spx_symbol, today, days_from_today=30):
                 closest_expiry = expiry_date
     return closest_expiry
 
+def calculate_calls_puts_sum(puts_df, calls_df):
+    vix_sum = 0
+    nputs = len(puts_df)
+    for i in range(nputs - 1):
+        Kp_i = puts_df.iloc[i]['strike']
+        Kp_i_next = puts_df.iloc[i + 1]['strike']
+        P_i = puts_df.iloc[i]['lastPrice']
+        vix_sum += P_i * (1 / Kp_i - 1 / Kp_i_next)
     
+    np_calls = len(calls_df)
+    for i in range(1, np_calls):
+        Kc_i = calls_df.iloc[i]['strike']
+        Kc_i_prev = calls_df.iloc[i - 1]['strike'] if i > 0 else Kc_i  
+        C_i = calls_df.iloc[i]['lastPrice']
+        vix_sum += C_i * (1 / Kc_i_prev - 1 / Kc_i)
+    
+    return vix_sum
+
+def VIX_estimator(puts_df, calls_df, F0, r=0.02, tau=41/365):
+    vix_sum = calculate_calls_puts_sum(puts_df, calls_df)
+    vix_square = (2 * np.exp(r * tau) / tau) * vix_sum
+    return np.sqrt(vix_square) * 100      
 
 
 
