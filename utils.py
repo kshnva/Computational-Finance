@@ -4,6 +4,8 @@ import yfinance as yf
 import datetime
 import math
 import matplotlib.pyplot as plt
+import statsmodels.api as sm
+from statsmodels.tsa.stattools import adfuller
 
 def calculate_mean_estimator(data):
     data['Natural Return'] = (data['Close'].shift(-1) - data['Close']) / data['Close']
@@ -128,8 +130,20 @@ def VIX_estimator(puts_df, calls_df, F0, r=0.02, tau=41/365):
     vix_square = (2 * np.exp(r * tau) / tau) * vix_sum
     return np.sqrt(vix_square) * 100      
 
+def run_ols(y, X):
+    X = sm.add_constant(X)
+    model = sm.OLS(y, X).fit(cov_type='HC3')
+    return model
 
 
 
-
+def adf_test(series, name=''):
+    """Print ADF stationarity test results for a given time series."""
+    result = adfuller(series.dropna(), autolag='AIC')
+    print(f'=== Augmented Dickey-Fuller Test for {name} ===')
+    print(f'ADF Statistic: {result[0]:.4f}')
+    print(f'p-value: {result[1]:.6f}')
+    for key, value in result[4].items():
+        print(f'Critical Values {key}, {value:.4f}')
+    print('--------------------------------------\n')
 
