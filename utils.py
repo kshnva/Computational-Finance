@@ -61,7 +61,7 @@ def get_rolling_window_estimates(data, T):
 
     return classic_measures, park_estimates, garman_estimates
 
-# 2️⃣ Define a reusable plotting function for rolling‐window estimates
+
 def plot_rolling_window_estimate(classic, parkinson, garman, window, ticker):
     plt.figure(figsize=(8, 6))
     plt.plot(classic,      label='Classic',      color=colors['Classic'],      linewidth=2)
@@ -120,8 +120,6 @@ def run_ols(y, X):
     X = sm.add_constant(X)
     model = sm.OLS(y, X).fit(cov_type='HC3')
     return model
-
-
 
 def adf_test(series, name=''):
     """Print ADF stationarity test results for a given time series."""
