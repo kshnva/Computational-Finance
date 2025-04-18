@@ -7,6 +7,14 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from statsmodels.tsa.stattools import adfuller
 
+colors = {
+    'Classic':      '#1f77b4',  # muted blue
+    'Parkinson':    '#ff7f0e',  # orange
+    'Garman-Klass': '#2ca02c',  # green
+    'Implied':      '#d62728',  # red
+    'VIX':          '#9467bd',  # purple
+}
+
 def calculate_mean_estimator(data):
     data['Natural Return'] = (data['Close'].shift(-1) - data['Close']) / data['Close']
     mu_hat = np.mean(data['Natural Return'])
@@ -53,42 +61,20 @@ def get_rolling_window_estimates(data, T):
 
     return classic_measures, park_estimates, garman_estimates
 
-def plot_rolling_window_estimate(classic_measures, park_estimates, garman_estimates, T): 
-    # plot volatility estimates
-    plt.plot(classic_measures, label='Classic')
-    plt.plot(park_estimates, label='Parkinson')
-    plt.plot(garman_estimates, label='Garman-Klass')
-
-    plt.title(f"Volatility Estimates for {T} Days")
-    plt.xlabel("Days")
-    plt.ylabel("Volatility")
+# 2️⃣ Define a reusable plotting function for rolling‐window estimates
+def plot_rolling_window_estimate(classic, parkinson, garman, window, ticker):
+    plt.figure(figsize=(8, 6))
+    plt.plot(classic,      label='Classic',      color=colors['Classic'],      linewidth=2)
+    plt.plot(parkinson,    label='Parkinson',    color=colors['Parkinson'],    linewidth=2)
+    plt.plot(garman,       label='Garman-Klass', color=colors['Garman-Klass'], linewidth=2)
+    plt.axhline(0, color='gray', linestyle='--', linewidth=1)
+    plt.title(f"Volatility Estimates for {ticker} (Window = {window})", fontsize=14)
+    plt.xlabel("Days", fontsize=12)
+    plt.ylabel("Volatility", fontsize=12)
     plt.legend()
+    plt.tight_layout()
     plt.show()
 
-def get_volatility_signature(data, windows):
-    classic_measures = []
-    park_estimates = []
-    garman_estimates = []
-
-    for window in windows:
-        classic, park, garman = get_rolling_window_estimates(data, window)
-        classic_measures.append(np.mean(classic))
-        park_estimates.append(np.mean(park))
-        garman_estimates.append(np.mean(garman))
-
-    return classic_measures, park_estimates, garman_estimates
-
-def plot_volatility_signature(windows, avg_classic_list, avg_park_list, avg_garman_list):
-    plt.figure(figsize=(10, 6))
-    plt.plot(windows, avg_classic_list, marker='o', label='Classic')
-    plt.plot(windows, avg_park_list, marker='o', label='Parkinson')
-    plt.plot(windows, avg_garman_list, marker='o', label='Garman-Klass')
-    plt.xlabel('Window Size (m)')
-    plt.ylabel('Average Realized Volatility')
-    plt.title('Volatility Signature Plot')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
 
 def find_closest_expiry(spx_symbol, today, days_from_today=30):
     spx_ticker = yf.Ticker(spx_symbol)
