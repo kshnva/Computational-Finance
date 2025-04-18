@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 import pandas as pd
-# Black-Scholes formulas
+
 def d1(S, K, r, sigma, tau):
     return (np.log(S/K) + (r + 0.5 * sigma**2) * tau) / (sigma * np.sqrt(tau))
 
@@ -69,12 +69,11 @@ def run_single_path(S0, K, r, sigma, T, hedge_frequency, dt, N):
         if day % hedge_frequency == 0 and day < N:
             tau = T - day * dt
             portfolio = rebalance_portfolio(S, K, r, sigma, tau, portfolio)
-        
-        # Calculate final P&L at expiry
+
         if day == N:
             return calculate_final_pnl(S, K, portfolio)
     
-    return None  # Should never reach here
+    return None  
 
 def run_hedging_simulation(S0, K, r, sigma, T, hedge_frequency, num_paths=10000, seed=42):
     """Run multiple simulation paths and collect P&L results"""
@@ -90,7 +89,7 @@ def run_hedging_simulation(S0, K, r, sigma, T, hedge_frequency, num_paths=10000,
 def run_simulations_with_different_frequencies(base_params, hedge_frequencies=None):
     """Run hedging simulations with different hedging frequencies."""
     if hedge_frequencies is None:
-        hedge_frequencies = [1, 5, 21]  # Default: Daily, Weekly, Monthly
+        hedge_frequencies = [1, 5, 21]  
     
     results = {}
     for freq in hedge_frequencies:
@@ -130,7 +129,7 @@ def plot_histogram_distribution(results, title='P&L Distribution by Hedging Freq
     plt.legend()
     plt.grid(True, alpha=0.3)
     
-    return plt.gcf()  # Return the current figure
+    return plt.gcf()  
 
 def plot_density_curves(results, title='P&L Density by Hedging Frequency'):
     """Create density plots for P&L distributions."""
@@ -144,7 +143,7 @@ def plot_density_curves(results, title='P&L Density by Hedging Frequency'):
     plt.legend()
     plt.grid(True, alpha=0.3)
     
-    return plt.gcf()  # Return the current figure
+    return plt.gcf()  
 
 def plot_boxplot_comparison(results, title='P&L Distribution by Hedging Frequency'):
     """Create boxplot comparison of P&L distributions."""
@@ -156,30 +155,21 @@ def plot_boxplot_comparison(results, title='P&L Distribution by Hedging Frequenc
     plt.ylabel('P&L (EUR)')
     plt.grid(True, alpha=0.3)
     
-    return plt.gcf()  # Return the current figure
+    return plt.gcf() 
 
 def run_standard_hedging_analysis(base_params=None, hedge_frequencies=None, show_plots=True):
     """Run the complete standard hedging analysis with customizable parameters."""
-    # Use default parameters if none provided
+
     if base_params is None:
-        base_params = {
-            'S0': 100,  # Initial stock price
-            'K': 99,    # Strike price
-            'r': 0.06,  # Risk-free rate
-            'sigma': 0.20,  # Volatility
-            'T': 1      # Time to maturity
-        }
-    
-    # Run simulations
+        base_params = {'S0': 100, 'K': 99,'r': 0.06, 'sigma': 0.20,'T': 1}
+
     results = run_simulations_with_different_frequencies(base_params, hedge_frequencies)
-    
-    # Create summary statistics
+
     summary = create_summary_statistics(results)
  
     print("Summary Statistics for Hedging Simulation:")
     print(summary)
-    
-    # Generate and show plots if requested
+
     if show_plots:
         plot_histogram_distribution(results)
         plot_density_curves(results)
@@ -187,4 +177,3 @@ def run_standard_hedging_analysis(base_params=None, hedge_frequencies=None, show
     
     return summary, results
 
-hedge_frequencies = [1, 5, 21]
